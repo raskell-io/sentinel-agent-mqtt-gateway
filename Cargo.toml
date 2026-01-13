@@ -9,7 +9,7 @@ repository = "https://github.com/raskell-io/sentinel-agent-mqtt-gateway"
 homepage = "https://sentinel.raskell.io"
 documentation = "https://sentinel.raskell.io/docs/agents/mqtt-gateway"
 description = "MQTT Gateway agent for Sentinel proxy - IoT protocol security with ACLs, auth, and payload inspection"
-keywords = ["sentinel", "mqtt", "iot", "security", "proxy", "agent"]
+keywords = ["sentinel", "mqtt", "iot", "proxy", "agent"]
 categories = ["network-programming"]
 readme = "README.md"
 
