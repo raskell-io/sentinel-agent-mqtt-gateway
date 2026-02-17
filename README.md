@@ -1,6 +1,6 @@
-# sentinel-agent-mqtt-gateway
+# zentinel-agent-mqtt-gateway
 
-IoT protocol security agent for [Sentinel](https://github.com/raskell-io/sentinel) reverse proxy. Provides topic-based ACLs, client authentication, payload inspection, rate limiting, and QoS enforcement for MQTT traffic.
+IoT protocol security agent for [Zentinel](https://github.com/zentinelproxy/zentinel) reverse proxy. Provides topic-based ACLs, client authentication, payload inspection, rate limiting, and QoS enforcement for MQTT traffic.
 
 > **Transport:** This agent processes MQTT packets carried over WebSocket frames. Native MQTT (TCP port 1883/8883) is not supported — MQTT clients must connect via WebSocket.
 
@@ -18,14 +18,14 @@ IoT protocol security agent for [Sentinel](https://github.com/raskell-io/sentine
 ### Using Cargo
 
 ```bash
-cargo install sentinel-agent-mqtt-gateway
+cargo install zentinel-agent-mqtt-gateway
 ```
 
 ### From Source
 
 ```bash
-git clone https://github.com/raskell-io/sentinel-agent-mqtt-gateway
-cd sentinel-agent-mqtt-gateway
+git clone https://github.com/zentinelproxy/zentinel-agent-mqtt-gateway
+cd zentinel-agent-mqtt-gateway
 cargo build --release
 ```
 
@@ -33,16 +33,16 @@ cargo build --release
 
 ```bash
 # Run with defaults
-sentinel-mqtt-agent --socket /tmp/sentinel-mqtt.sock
+zentinel-mqtt-agent --socket /tmp/zentinel-mqtt.sock
 
 # With configuration file
-sentinel-mqtt-agent \
-  --socket /tmp/sentinel-mqtt.sock \
-  --config /etc/sentinel/mqtt-gateway.json
+zentinel-mqtt-agent \
+  --socket /tmp/zentinel-mqtt.sock \
+  --config /etc/zentinel/mqtt-gateway.json
 
 # With JSON logging
-sentinel-mqtt-agent \
-  --socket /tmp/sentinel-mqtt.sock \
+zentinel-mqtt-agent \
+  --socket /tmp/zentinel-mqtt.sock \
   --json-logs \
   --log-level debug
 ```
@@ -51,7 +51,7 @@ sentinel-mqtt-agent \
 
 | Option | Env Var | Description | Default |
 |--------|---------|-------------|---------|
-| `--socket` | `AGENT_SOCKET` | Unix socket path | `/tmp/sentinel-mqtt-agent.sock` |
+| `--socket` | `AGENT_SOCKET` | Unix socket path | `/tmp/zentinel-mqtt-agent.sock` |
 | `--grpc-address` | `AGENT_GRPC_ADDRESS` | gRPC listen address | - |
 | `--config` | `MQTT_CONFIG` | Configuration file path | - |
 | `--log-level` | `MQTT_LOG_LEVEL` | Log level (trace, debug, info, warn, error) | `info` |
@@ -67,7 +67,7 @@ sentinel-mqtt-agent \
     "providers": [
       {
         "type": "file",
-        "path": "/etc/sentinel/mqtt-users.json"
+        "path": "/etc/zentinel/mqtt-users.json"
       }
     ]
   },
@@ -139,14 +139,14 @@ Standard MQTT wildcards:
 - `+` — Matches exactly one level (`sensors/+/data` matches `sensors/temp/data`)
 - `#` — Matches zero or more levels (`sensors/#` matches `sensors/temp/living/zone1`)
 
-## Sentinel Configuration
+## Zentinel Configuration
 
 ```kdl
 agents {
     agent "mqtt-gateway" {
         type "custom"
         transport "unix_socket" {
-            path "/tmp/sentinel-mqtt.sock"
+            path "/tmp/zentinel-mqtt.sock"
         }
         events ["websocket_frame"]
         timeout-ms 100

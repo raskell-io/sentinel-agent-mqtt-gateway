@@ -1,27 +1,27 @@
 //! MQTT Gateway Agent CLI
 //!
-//! Standalone agent binary for the Sentinel proxy.
+//! Standalone agent binary for the Zentinel proxy.
 //!
 //! Supports both v2 UDS and gRPC transports.
 
 use anyhow::Result;
 use clap::Parser;
-use sentinel_agent_mqtt_gateway::{MqttGatewayAgent, MqttGatewayConfig};
-use sentinel_agent_protocol::v2::GrpcAgentServerV2;
-use sentinel_agent_protocol::AgentServer;
+use zentinel_agent_mqtt_gateway::{MqttGatewayAgent, MqttGatewayConfig};
+use zentinel_agent_protocol::v2::GrpcAgentServerV2;
+use zentinel_agent_protocol::AgentServer;
 use std::path::PathBuf;
 use tracing::info;
 use tracing_subscriber::{fmt, EnvFilter};
 
-/// MQTT Gateway Agent for Sentinel
+/// MQTT Gateway Agent for Zentinel
 #[derive(Parser, Debug)]
-#[command(name = "sentinel-mqtt-agent")]
-#[command(author = "Sentinel Contributors")]
+#[command(name = "zentinel-mqtt-agent")]
+#[command(author = "Zentinel Contributors")]
 #[command(version)]
-#[command(about = "MQTT Gateway security agent for Sentinel proxy (Protocol v2)", long_about = None)]
+#[command(about = "MQTT Gateway security agent for Zentinel proxy (Protocol v2)", long_about = None)]
 struct Args {
     /// Unix socket path for agent communication (UDS transport)
-    #[arg(short, long, default_value = "/tmp/sentinel-mqtt-agent.sock")]
+    #[arg(short, long, default_value = "/tmp/zentinel-mqtt-agent.sock")]
     socket: PathBuf,
 
     /// gRPC server address (e.g., "0.0.0.0:50051")

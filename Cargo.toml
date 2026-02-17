@@ -1,29 +1,29 @@
 [package]
-name = "sentinel-agent-mqtt-gateway"
+name = "zentinel-agent-mqtt-gateway"
 version = "0.2.0"
 edition = "2021"
 rust-version = "1.75"
-authors = ["Sentinel Contributors"]
+authors = ["Zentinel Contributors"]
 license = "Apache-2.0"
-repository = "https://github.com/raskell-io/sentinel-agent-mqtt-gateway"
-homepage = "https://sentinel.raskell.io"
-documentation = "https://sentinel.raskell.io/docs/agents/mqtt-gateway"
-description = "MQTT Gateway agent for Sentinel proxy - IoT protocol security with ACLs, auth, and payload inspection"
-keywords = ["sentinel", "mqtt", "iot", "proxy", "agent"]
+repository = "https://github.com/zentinelproxy/zentinel-agent-mqtt-gateway"
+homepage = "https://zentinelproxy.io"
+documentation = "https://zentinelproxy.io/docs/agents/mqtt-gateway"
+description = "MQTT Gateway agent for Zentinel proxy - IoT protocol security with ACLs, auth, and payload inspection"
+keywords = ["zentinel", "mqtt", "iot", "proxy", "agent"]
 categories = ["network-programming"]
 readme = "README.md"
 
 [[bin]]
-name = "sentinel-mqtt-agent"
+name = "zentinel-mqtt-agent"
 path = "src/main.rs"
 
 [lib]
-name = "sentinel_agent_mqtt_gateway"
+name = "zentinel_agent_mqtt_gateway"
 path = "src/lib.rs"
 
 [dependencies]
-# Sentinel protocol
-sentinel-agent-protocol = "0.3"
+# Zentinel protocol
+zentinel-agent-protocol = "0.3"
 
 # MQTT parsing
 mqttrs = "0.4"

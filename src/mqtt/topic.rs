@@ -26,7 +26,7 @@ impl TopicMatcher {
     ///
     /// # Examples
     /// ```
-    /// use sentinel_agent_mqtt_gateway::mqtt::TopicMatcher;
+    /// use zentinel_agent_mqtt_gateway::mqtt::TopicMatcher;
     ///
     /// let matcher = TopicMatcher::new();
     /// assert!(matcher.matches("sensors/temp/living-room", "sensors/+/living-room"));

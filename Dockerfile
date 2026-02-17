@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1.4
 
-# Sentinel MQTT Gateway Agent Container Image
+# Zentinel MQTT Gateway Agent Container Image
 #
 # Targets:
 #   - prebuilt: For CI with pre-built binaries
@@ -10,16 +10,16 @@
 ################################################################################
 FROM gcr.io/distroless/cc-debian12:nonroot AS prebuilt
 
-COPY sentinel-mqtt-agent /sentinel-mqtt-agent
+COPY zentinel-mqtt-agent /zentinel-mqtt-agent
 
-LABEL org.opencontainers.image.title="Sentinel MQTT Gateway Agent" \
-      org.opencontainers.image.description="Sentinel MQTT Gateway Agent for Sentinel reverse proxy" \
+LABEL org.opencontainers.image.title="Zentinel MQTT Gateway Agent" \
+      org.opencontainers.image.description="Zentinel MQTT Gateway Agent for Zentinel reverse proxy" \
       org.opencontainers.image.vendor="Raskell" \
-      org.opencontainers.image.source="https://github.com/raskell-io/sentinel-agent-mqtt-gateway"
+      org.opencontainers.image.source="https://github.com/zentinelproxy/zentinel-agent-mqtt-gateway"
 
-ENV RUST_LOG=info,sentinel_mqtt_agent=debug \
-    SOCKET_PATH=/var/run/sentinel/mqtt.sock
+ENV RUST_LOG=info,zentinel_mqtt_agent=debug \
+    SOCKET_PATH=/var/run/zentinel/mqtt.sock
 
 USER nonroot:nonroot
 
-ENTRYPOINT ["/sentinel-mqtt-agent"]
+ENTRYPOINT ["/zentinel-mqtt-agent"]

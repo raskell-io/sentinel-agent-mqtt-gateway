@@ -15,11 +15,11 @@ use anyhow::Result;
 use base64::{engine::general_purpose::STANDARD as BASE64, Engine};
 use dashmap::DashMap;
 use parking_lot::RwLock;
-use sentinel_agent_protocol::{
+use zentinel_agent_protocol::{
     AgentHandler, AgentResponse, AuditMetadata, ConfigureEvent, EventType, RequestHeadersEvent,
     WebSocketFrameEvent,
 };
-use sentinel_agent_protocol::v2::{
+use zentinel_agent_protocol::v2::{
     AgentCapabilities, AgentFeatures, AgentHandlerV2, AgentLimits, DrainReason, HealthConfig,
     HealthStatus, MetricsReport, ShutdownReason,
 };
@@ -576,7 +576,7 @@ impl AgentHandlerV2 for MqttGatewayAgent {
         let blocked = self.requests_blocked.load(Ordering::Relaxed);
 
         let mut status = HealthStatus::healthy("mqtt-gateway");
-        status.load = Some(sentinel_agent_protocol::v2::LoadMetrics {
+        status.load = Some(zentinel_agent_protocol::v2::LoadMetrics {
             in_flight: connections,
             queue_depth: 0,
             avg_latency_ms: 0.0,
@@ -592,7 +592,7 @@ impl AgentHandlerV2 for MqttGatewayAgent {
 
     /// Return metrics report for export
     fn metrics_report(&self) -> Option<MetricsReport> {
-        use sentinel_agent_protocol::v2::{CounterMetric, GaugeMetric};
+        use zentinel_agent_protocol::v2::{CounterMetric, GaugeMetric};
 
         let mut report = MetricsReport::new("mqtt-gateway", 10_000);
 

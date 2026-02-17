@@ -1,9 +1,9 @@
 //! Integration tests for MQTT Gateway Agent
 
-use sentinel_agent_mqtt_gateway::config::*;
-use sentinel_agent_mqtt_gateway::mqtt::{parse_packet, MqttPacket, TopicMatcher};
-use sentinel_agent_mqtt_gateway::acl::AclEvaluator;
-use sentinel_agent_mqtt_gateway::MqttGatewayAgent;
+use zentinel_agent_mqtt_gateway::config::*;
+use zentinel_agent_mqtt_gateway::mqtt::{parse_packet, MqttPacket, TopicMatcher};
+use zentinel_agent_mqtt_gateway::acl::AclEvaluator;
+use zentinel_agent_mqtt_gateway::MqttGatewayAgent;
 
 /// Test MQTT packet parsing
 #[test]
@@ -199,7 +199,7 @@ fn test_config_deserialization() {
 /// Test inspection patterns
 #[test]
 fn test_inspection_patterns() {
-    use sentinel_agent_mqtt_gateway::inspection::PatternInspector;
+    use zentinel_agent_mqtt_gateway::inspection::PatternInspector;
 
     let config = PatternConfig {
         sqli: true,
@@ -232,7 +232,7 @@ fn test_inspection_patterns() {
 /// Test rate limiting
 #[test]
 fn test_rate_limiting() {
-    use sentinel_agent_mqtt_gateway::ratelimit::RateLimiter;
+    use zentinel_agent_mqtt_gateway::ratelimit::RateLimiter;
 
     let config = RateLimitConfig {
         enabled: true,
@@ -266,7 +266,7 @@ fn test_rate_limiting() {
 /// Test QoS enforcement
 #[test]
 fn test_qos_enforcement() {
-    use sentinel_agent_mqtt_gateway::qos::QosEnforcer;
+    use zentinel_agent_mqtt_gateway::qos::QosEnforcer;
 
     let config = QosConfig {
         enabled: true,
@@ -296,7 +296,7 @@ fn test_qos_enforcement() {
 /// Test retained message control
 #[test]
 fn test_retained_control() {
-    use sentinel_agent_mqtt_gateway::retained::RetainedController;
+    use zentinel_agent_mqtt_gateway::retained::RetainedController;
 
     let config = RetainedConfig {
         enabled: true,

@@ -1,4 +1,4 @@
-//! MQTT Gateway Agent for Sentinel Proxy
+//! MQTT Gateway Agent for Zentinel Proxy
 //!
 //! This agent provides comprehensive security controls for MQTT traffic:
 //!
@@ -12,7 +12,7 @@
 //! # Architecture
 //!
 //! The agent processes MQTT packets from WebSocket binary frames. It implements
-//! the Sentinel `AgentHandler` trait and receives `WebSocketFrameEvent` for each
+//! the Zentinel `AgentHandler` trait and receives `WebSocketFrameEvent` for each
 //! MQTT packet transmitted over WebSocket.
 //!
 //! # Example Configuration
