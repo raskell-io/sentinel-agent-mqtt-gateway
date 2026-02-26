@@ -83,12 +83,13 @@ impl JwtAuthenticator {
         }
 
         // Check extra claims
-        claims.extra.get(&self.username_claim).and_then(|v| {
-            match v {
+        claims
+            .extra
+            .get(&self.username_claim)
+            .and_then(|v| match v {
                 serde_json::Value::String(s) => Some(s.clone()),
                 _ => None,
-            }
-        })
+            })
     }
 }
 
@@ -108,7 +109,9 @@ impl AuthenticatorProvider for JwtAuthenticator {
             Some(secret) => DecodingKey::from_secret(secret.as_bytes()),
             None => {
                 // Without a secret or JWKS, we can't validate
-                return Ok(AuthResult::failure("No secret configured for JWT validation"));
+                return Ok(AuthResult::failure(
+                    "No secret configured for JWT validation",
+                ));
             }
         };
 
@@ -135,7 +138,10 @@ impl AuthenticatorProvider for JwtAuthenticator {
         let token_data = match decode::<Claims>(&token, &key, &validation) {
             Ok(data) => data,
             Err(e) => {
-                return Ok(AuthResult::failure(&format!("Token validation failed: {}", e)));
+                return Ok(AuthResult::failure(&format!(
+                    "Token validation failed: {}",
+                    e
+                )));
             }
         };
 

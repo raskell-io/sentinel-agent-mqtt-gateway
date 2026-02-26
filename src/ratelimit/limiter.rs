@@ -103,9 +103,10 @@ impl RateLimiter {
         if let Some(ref limit) = config.per_client {
             let key = self.get_client_key(context, &config.key_by);
 
-            let limiter = self.client_limiters.entry(key.clone()).or_insert_with(|| {
-                create_limiter_pair(limit)
-            });
+            let limiter = self
+                .client_limiters
+                .entry(key.clone())
+                .or_insert_with(|| create_limiter_pair(limit));
 
             if !check_limiter(&limiter, payload_size) {
                 debug!(client = %key, "Per-client rate limit exceeded");
@@ -116,13 +117,17 @@ impl RateLimiter {
         // Check per-topic limits
         for topic_limit in &config.per_topic {
             if self.topic_matcher.matches(topic, &topic_limit.topic) {
-                let limiter = self.topic_limiters.entry(topic_limit.topic.clone()).or_insert_with(|| {
-                    create_limiter_pair(&topic_limit.limit)
-                });
+                let limiter = self
+                    .topic_limiters
+                    .entry(topic_limit.topic.clone())
+                    .or_insert_with(|| create_limiter_pair(&topic_limit.limit));
 
                 if !check_limiter(&limiter, payload_size) {
                     debug!(topic = %topic, pattern = %topic_limit.topic, "Per-topic rate limit exceeded");
-                    return RateLimitResult::denied(&format!("per-topic:{}", topic_limit.topic), Some(1000));
+                    return RateLimitResult::denied(
+                        &format!("per-topic:{}", topic_limit.topic),
+                        Some(1000),
+                    );
                 }
             }
         }
@@ -134,7 +139,10 @@ impl RateLimiter {
     fn get_client_key(&self, context: &ConnectionContext, key_by: &RateLimitKey) -> String {
         match key_by {
             RateLimitKey::ClientId => context.client_id.clone(),
-            RateLimitKey::Username => context.username.clone().unwrap_or_else(|| "anonymous".to_string()),
+            RateLimitKey::Username => context
+                .username
+                .clone()
+                .unwrap_or_else(|| "anonymous".to_string()),
             RateLimitKey::ClientIp => context.client_ip.clone(),
         }
     }
@@ -178,11 +186,9 @@ impl Default for RateLimiter {
 
 fn create_limiter_pair(limit: &RateLimit) -> ClientLimiter {
     let messages = if limit.messages_per_second > 0 {
-        let quota = Quota::per_second(
-            NonZeroU32::new(limit.messages_per_second).unwrap_or(nonzero!(1u32))
-        ).allow_burst(
-            NonZeroU32::new(limit.burst).unwrap_or(nonzero!(1u32))
-        );
+        let quota =
+            Quota::per_second(NonZeroU32::new(limit.messages_per_second).unwrap_or(nonzero!(1u32)))
+                .allow_burst(NonZeroU32::new(limit.burst).unwrap_or(nonzero!(1u32)));
         Some(Arc::new(GovRateLimiter::direct(quota)))
     } else {
         None
@@ -191,10 +197,10 @@ fn create_limiter_pair(limit: &RateLimit) -> ClientLimiter {
     let bytes = if limit.bytes_per_second > 0 {
         // For bytes, use cells_per_second
         let quota = Quota::per_second(
-            NonZeroU32::new(limit.bytes_per_second.min(u32::MAX as u64) as u32).unwrap_or(nonzero!(1u32))
-        ).allow_burst(
-            NonZeroU32::new(limit.burst * 1024).unwrap_or(nonzero!(1024u32))
-        );
+            NonZeroU32::new(limit.bytes_per_second.min(u32::MAX as u64) as u32)
+                .unwrap_or(nonzero!(1u32)),
+        )
+        .allow_burst(NonZeroU32::new(limit.burst * 1024).unwrap_or(nonzero!(1024u32)));
         Some(Arc::new(GovRateLimiter::direct(quota)))
     } else {
         None
@@ -333,11 +339,23 @@ mod tests {
 
         // High-freq topic allows many messages
         for _ in 0..10 {
-            assert!(limiter.check_message(&context, "high-freq/data", 100).allowed);
+            assert!(
+                limiter
+                    .check_message(&context, "high-freq/data", 100)
+                    .allowed
+            );
         }
 
         // Low-freq topic is more restrictive
-        assert!(limiter.check_message(&context, "low-freq/data", 100).allowed);
-        assert!(!limiter.check_message(&context, "low-freq/data", 100).allowed);
+        assert!(
+            limiter
+                .check_message(&context, "low-freq/data", 100)
+                .allowed
+        );
+        assert!(
+            !limiter
+                .check_message(&context, "low-freq/data", 100)
+                .allowed
+        );
     }
 }

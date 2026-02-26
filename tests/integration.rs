@@ -1,8 +1,8 @@
 //! Integration tests for MQTT Gateway Agent
 
+use zentinel_agent_mqtt_gateway::acl::AclEvaluator;
 use zentinel_agent_mqtt_gateway::config::*;
 use zentinel_agent_mqtt_gateway::mqtt::{parse_packet, MqttPacket, TopicMatcher};
-use zentinel_agent_mqtt_gateway::acl::AclEvaluator;
 use zentinel_agent_mqtt_gateway::MqttGatewayAgent;
 
 /// Test MQTT packet parsing
@@ -272,12 +272,10 @@ fn test_qos_enforcement() {
         enabled: true,
         max_qos: 1,
         downgrade: true,
-        per_topic: vec![
-            TopicQosLimit {
-                topic: "realtime/#".to_string(),
-                max_qos: 0,
-            },
-        ],
+        per_topic: vec![TopicQosLimit {
+            topic: "realtime/#".to_string(),
+            max_qos: 0,
+        }],
     };
 
     let enforcer = QosEnforcer::new(&config);

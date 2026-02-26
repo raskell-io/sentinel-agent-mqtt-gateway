@@ -65,7 +65,8 @@ impl QosEnforcer {
         }
 
         // Find per-topic limit
-        let max_qos = config.per_topic
+        let max_qos = config
+            .per_topic
             .iter()
             .find(|limit| self.topic_matcher.matches(topic, &limit.topic))
             .map(|limit| limit.max_qos)
@@ -148,12 +149,10 @@ mod tests {
             enabled: true,
             max_qos: 2,
             downgrade: true,
-            per_topic: vec![
-                TopicQosLimit {
-                    topic: "realtime/#".to_string(),
-                    max_qos: 0,
-                },
-            ],
+            per_topic: vec![TopicQosLimit {
+                topic: "realtime/#".to_string(),
+                max_qos: 0,
+            }],
         };
         let enforcer = QosEnforcer::new(&config);
 

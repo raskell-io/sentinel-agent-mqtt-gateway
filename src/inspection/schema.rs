@@ -17,8 +17,8 @@ impl SchemaValidator {
         let content = std::fs::read_to_string(path)
             .with_context(|| format!("Failed to read schema file: {}", path.display()))?;
 
-        let schema: serde_json::Value = serde_json::from_str(&content)
-            .with_context(|| "Failed to parse schema as JSON")?;
+        let schema: serde_json::Value =
+            serde_json::from_str(&content).with_context(|| "Failed to parse schema as JSON")?;
 
         let validator = JSONSchema::compile(&schema)
             .map_err(|e| anyhow::anyhow!("Failed to compile JSON schema: {}", e))?;
@@ -52,10 +52,15 @@ impl SchemaValidator {
             Ok(())
         } else {
             // Collect errors
-            let error_messages: Vec<String> = self.validator
+            let error_messages: Vec<String> = self
+                .validator
                 .validate(&value)
                 .err()
-                .map(|errors| errors.map(|e| format!("{} at {}", e, e.instance_path)).collect())
+                .map(|errors| {
+                    errors
+                        .map(|e| format!("{} at {}", e, e.instance_path))
+                        .collect()
+                })
                 .unwrap_or_default();
             Err(error_messages)
         }

@@ -15,16 +15,16 @@ use anyhow::Result;
 use base64::{engine::general_purpose::STANDARD as BASE64, Engine};
 use dashmap::DashMap;
 use parking_lot::RwLock;
-use zentinel_agent_protocol::{
-    AgentResponse, AuditMetadata, EventType, RequestHeadersEvent, WebSocketFrameEvent,
-};
+use std::sync::atomic::{AtomicU64, Ordering};
+use std::sync::Arc;
+use tracing::{debug, info, warn};
 use zentinel_agent_protocol::v2::{
     AgentCapabilities, AgentFeatures, AgentHandlerV2, AgentLimits, DrainReason, HealthConfig,
     HealthStatus, MetricsReport, ShutdownReason,
 };
-use std::sync::atomic::{AtomicU64, Ordering};
-use std::sync::Arc;
-use tracing::{debug, info, warn};
+use zentinel_agent_protocol::{
+    AgentResponse, AuditMetadata, EventType, RequestHeadersEvent, WebSocketFrameEvent,
+};
 
 /// MQTT Gateway Agent
 pub struct MqttGatewayAgent {
@@ -69,8 +69,7 @@ impl MqttGatewayAgent {
     /// Create a new MQTT Gateway agent with the given configuration
     pub fn with_config(config: MqttGatewayConfig) -> Result<Self> {
         let authenticator = Authenticator::new(&config.auth)?;
-        let acl = AclEvaluator::new(&config.acl)
-            .map_err(|e| anyhow::anyhow!("{}", e))?;
+        let acl = AclEvaluator::new(&config.acl).map_err(|e| anyhow::anyhow!("{}", e))?;
         let rate_limiter = RateLimiter::new(&config.rate_limit);
         let inspector = PayloadInspector::new(&config.inspection)?;
         let qos_enforcer = QosEnforcer::new(&config.qos);
@@ -99,7 +98,8 @@ impl MqttGatewayAgent {
     pub fn reconfigure(&self, config: MqttGatewayConfig) -> Result<()> {
         // Update components
         self.authenticator.write().reconfigure(&config.auth)?;
-        self.acl.reconfigure(&config.acl)
+        self.acl
+            .reconfigure(&config.acl)
             .map_err(|e| anyhow::anyhow!("{}", e))?;
         self.rate_limiter.reconfigure(&config.rate_limit);
         self.inspector.write().reconfigure(&config.inspection)?;
@@ -130,18 +130,12 @@ impl MqttGatewayAgent {
             MqttPacket::Connect(connect) => {
                 self.handle_connect(correlation_id, client_ip, &connect)
             }
-            MqttPacket::Publish(publish) => {
-                self.handle_publish(correlation_id, &publish)
-            }
-            MqttPacket::Subscribe(subscribe) => {
-                self.handle_subscribe(correlation_id, &subscribe)
-            }
+            MqttPacket::Publish(publish) => self.handle_publish(correlation_id, &publish),
+            MqttPacket::Subscribe(subscribe) => self.handle_subscribe(correlation_id, &subscribe),
             MqttPacket::Unsubscribe(unsubscribe) => {
                 self.handle_unsubscribe(correlation_id, &unsubscribe.topics)
             }
-            MqttPacket::Disconnect => {
-                self.handle_disconnect(correlation_id)
-            }
+            MqttPacket::Disconnect => self.handle_disconnect(correlation_id),
             MqttPacket::PingReq | MqttPacket::PingResp => {
                 // Allow ping/pong
                 AgentResponse::websocket_allow()
@@ -180,7 +174,10 @@ impl MqttGatewayAgent {
             self.requests_blocked.fetch_add(1, Ordering::Relaxed);
             return self.close_connection(
                 "auth-failed",
-                auth_result.reason.as_deref().unwrap_or("Authentication failed"),
+                auth_result
+                    .reason
+                    .as_deref()
+                    .unwrap_or("Authentication failed"),
                 0x05, // Not authorized
             );
         }
@@ -196,14 +193,20 @@ impl MqttGatewayAgent {
         };
 
         // Apply auth result to context
-        self.authenticator.read().apply_to_context(&mut context, &auth_result);
+        self.authenticator
+            .read()
+            .apply_to_context(&mut context, &auth_result);
 
         // Store context
         self.connections.insert(correlation_id.to_string(), context);
 
         debug!(client_id = %connect.client_id, "CONNECT allowed");
         AgentResponse::websocket_allow().with_audit(AuditMetadata {
-            tags: vec!["mqtt".to_string(), "connect".to_string(), "success".to_string()],
+            tags: vec![
+                "mqtt".to_string(),
+                "connect".to_string(),
+                "success".to_string(),
+            ],
             ..Default::default()
         })
     }
@@ -248,11 +251,9 @@ impl MqttGatewayAgent {
         }
 
         // Rate limit check
-        let rate_result = self.rate_limiter.check_message(
-            &context,
-            &publish.topic,
-            publish.payload.len(),
-        );
+        let rate_result =
+            self.rate_limiter
+                .check_message(&context, &publish.topic, publish.payload.len());
 
         if !rate_result.allowed {
             info!(
@@ -277,15 +278,16 @@ impl MqttGatewayAgent {
                 qos = publish.qos,
                 "PUBLISH QoS denied"
             );
-            return self.drop_response("qos-denied", qos_result.reason.as_deref().unwrap_or("QoS not allowed"));
+            return self.drop_response(
+                "qos-denied",
+                qos_result.reason.as_deref().unwrap_or("QoS not allowed"),
+            );
         }
 
         // Retained message check
-        let retained_result = self.retained_controller.check(
-            &publish.topic,
-            publish.payload.len(),
-            publish.retain,
-        );
+        let retained_result =
+            self.retained_controller
+                .check(&publish.topic, publish.payload.len(), publish.retain);
 
         if !retained_result.allowed {
             info!(
@@ -295,15 +297,23 @@ impl MqttGatewayAgent {
             );
             return self.drop_response(
                 "retained-denied",
-                retained_result.reason.as_deref().unwrap_or("Retained not allowed"),
+                retained_result
+                    .reason
+                    .as_deref()
+                    .unwrap_or("Retained not allowed"),
             );
         }
 
         // Payload inspection
-        let inspection_result = self.inspector.read().inspect(&publish.topic, &publish.payload);
+        let inspection_result = self
+            .inspector
+            .read()
+            .inspect(&publish.topic, &publish.payload);
 
         if !inspection_result.passed && inspection_result.should_block {
-            let patterns: Vec<_> = inspection_result.detections.iter()
+            let patterns: Vec<_> = inspection_result
+                .detections
+                .iter()
                 .map(|d| d.pattern_id.clone())
                 .collect();
 
@@ -649,4 +659,3 @@ impl AgentHandlerV2 for MqttGatewayAgent {
         // but the proxy will stop sending new ones
     }
 }
-

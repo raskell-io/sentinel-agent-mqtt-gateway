@@ -88,7 +88,11 @@ impl PayloadInspector {
             return InspectionResult::failed(
                 vec![Detection::new(
                     "size-limit",
-                    format!("Payload size {} exceeds limit {}", payload.len(), self.config.max_payload_size),
+                    format!(
+                        "Payload size {} exceeds limit {}",
+                        payload.len(),
+                        self.config.max_payload_size
+                    ),
                     crate::config::Severity::Medium,
                 )],
                 true,
@@ -107,7 +111,9 @@ impl PayloadInspector {
                 // JSON schema validation (if configured for this topic)
                 if let Some(ref validator) = self.schema_validator {
                     if let Some(ref schema_config) = self.config.json_schema {
-                        let should_validate = schema_config.topics.iter()
+                        let should_validate = schema_config
+                            .topics
+                            .iter()
                             .any(|p| self.topic_matcher.matches(topic, p));
 
                         if should_validate {
@@ -158,4 +164,3 @@ impl PayloadInspector {
         Ok(())
     }
 }
-

@@ -137,8 +137,7 @@ fn load_credentials_file(path: &Path) -> Result<HashMap<String, UserEntry>> {
 
     // Try JSON first, then YAML
     let file: CredentialsFile = if path.extension().map(|e| e == "json").unwrap_or(false) {
-        serde_json::from_str(&contents)
-            .with_context(|| "Failed to parse JSON credentials file")?
+        serde_json::from_str(&contents).with_context(|| "Failed to parse JSON credentials file")?
     } else {
         // Assume YAML
         serde_json::from_str(&contents)
@@ -152,8 +151,7 @@ fn load_credentials_file(path: &Path) -> Result<HashMap<String, UserEntry>> {
 /// Hash a password for storage
 #[allow(dead_code)]
 pub fn hash_password(password: &str) -> Result<String> {
-    bcrypt::hash(password, bcrypt::DEFAULT_COST)
-        .context("Failed to hash password")
+    bcrypt::hash(password, bcrypt::DEFAULT_COST).context("Failed to hash password")
 }
 
 #[cfg(test)]

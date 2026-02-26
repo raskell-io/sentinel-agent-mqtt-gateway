@@ -5,5 +5,8 @@
 mod parser;
 mod topic;
 
-pub use parser::{parse_packet, MqttPacket, MqttPacketType, ParsedConnect, ParsedPublish, ParsedSubscribe, ParsedUnsubscribe};
+pub use parser::{
+    parse_packet, MqttPacket, MqttPacketType, ParsedConnect, ParsedPublish, ParsedSubscribe,
+    ParsedUnsubscribe,
+};
 pub use topic::TopicMatcher;

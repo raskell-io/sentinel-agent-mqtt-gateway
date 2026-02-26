@@ -61,7 +61,9 @@ impl RetainedController {
         // Check global setting
         if !config.allow_retained {
             // Check if topic is in allowed list
-            let in_allowed = config.allowed_topics.iter()
+            let in_allowed = config
+                .allowed_topics
+                .iter()
                 .any(|p| self.topic_matcher.matches(topic, p));
 
             if !in_allowed {
@@ -70,7 +72,9 @@ impl RetainedController {
         }
 
         // Check blocked list
-        let in_blocked = config.blocked_topics.iter()
+        let in_blocked = config
+            .blocked_topics
+            .iter()
             .any(|p| self.topic_matcher.matches(topic, p));
 
         if in_blocked {

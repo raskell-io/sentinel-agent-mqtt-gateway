@@ -89,33 +89,49 @@ pub struct CompiledRule {
 impl CompiledRule {
     /// Compile a rule from configuration
     pub fn from_config(rule: &AclRule) -> Result<Self, String> {
-        let username_regex = match (&rule.match_conditions.username, &rule.match_conditions.username_regex) {
-            (Some(exact), _) => Some(Regex::new(&format!("^{}$", regex::escape(exact)))
-                .map_err(|e| format!("Invalid username pattern: {}", e))?),
-            (_, Some(pattern)) => Some(Regex::new(pattern)
-                .map_err(|e| format!("Invalid username regex: {}", e))?),
+        let username_regex = match (
+            &rule.match_conditions.username,
+            &rule.match_conditions.username_regex,
+        ) {
+            (Some(exact), _) => Some(
+                Regex::new(&format!("^{}$", regex::escape(exact)))
+                    .map_err(|e| format!("Invalid username pattern: {}", e))?,
+            ),
+            (_, Some(pattern)) => {
+                Some(Regex::new(pattern).map_err(|e| format!("Invalid username regex: {}", e))?)
+            }
             (None, None) => None,
         };
 
-        let client_id_regex = match (&rule.match_conditions.client_id, &rule.match_conditions.client_id_regex) {
-            (Some(exact), _) => Some(Regex::new(&format!("^{}$", regex::escape(exact)))
-                .map_err(|e| format!("Invalid client_id pattern: {}", e))?),
-            (_, Some(pattern)) => Some(Regex::new(pattern)
-                .map_err(|e| format!("Invalid client_id regex: {}", e))?),
+        let client_id_regex = match (
+            &rule.match_conditions.client_id,
+            &rule.match_conditions.client_id_regex,
+        ) {
+            (Some(exact), _) => Some(
+                Regex::new(&format!("^{}$", regex::escape(exact)))
+                    .map_err(|e| format!("Invalid client_id pattern: {}", e))?,
+            ),
+            (_, Some(pattern)) => {
+                Some(Regex::new(pattern).map_err(|e| format!("Invalid client_id regex: {}", e))?)
+            }
             (None, None) => None,
         };
 
-        let client_ip_net = rule.match_conditions.client_ip
+        let client_ip_net = rule
+            .match_conditions
+            .client_ip
             .as_ref()
-            .map(|ip| IpNet::from_str(ip).or_else(|_| {
-                // Try parsing as single IP
-                IpAddr::from_str(ip)
-                    .map(|addr| match addr {
-                        IpAddr::V4(v4) => IpNet::V4(ipnet::Ipv4Net::new(v4, 32).unwrap()),
-                        IpAddr::V6(v6) => IpNet::V6(ipnet::Ipv6Net::new(v6, 128).unwrap()),
-                    })
-                    .map_err(|e| format!("Invalid IP/CIDR: {}", e))
-            }))
+            .map(|ip| {
+                IpNet::from_str(ip).or_else(|_| {
+                    // Try parsing as single IP
+                    IpAddr::from_str(ip)
+                        .map(|addr| match addr {
+                            IpAddr::V4(v4) => IpNet::V4(ipnet::Ipv4Net::new(v4, 32).unwrap()),
+                            IpAddr::V6(v6) => IpNet::V6(ipnet::Ipv6Net::new(v6, 128).unwrap()),
+                        })
+                        .map_err(|e| format!("Invalid IP/CIDR: {}", e))
+                })
+            })
             .transpose()
             .map_err(|e| e.to_string())?;
 

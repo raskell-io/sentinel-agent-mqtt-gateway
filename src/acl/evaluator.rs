@@ -114,9 +114,10 @@ impl AclEvaluator {
             }
 
             // Check if any topic pattern matches
-            let topic_matches = rule.topic_patterns.iter().any(|pattern| {
-                self.topic_matcher.matches(request.topic, pattern)
-            });
+            let topic_matches = rule
+                .topic_patterns
+                .iter()
+                .any(|pattern| self.topic_matcher.matches(request.topic, pattern));
 
             if !topic_matches {
                 continue;
@@ -311,11 +312,23 @@ mod tests {
         let context = make_context("client1", None);
 
         // Should match
-        assert!(evaluator.can_publish(&context, "users/alice/messages", 0).allowed);
-        assert!(evaluator.can_publish(&context, "users/bob/messages", 0).allowed);
+        assert!(
+            evaluator
+                .can_publish(&context, "users/alice/messages", 0)
+                .allowed
+        );
+        assert!(
+            evaluator
+                .can_publish(&context, "users/bob/messages", 0)
+                .allowed
+        );
 
         // Should not match
-        assert!(!evaluator.can_publish(&context, "users/alice/private", 0).allowed);
+        assert!(
+            !evaluator
+                .can_publish(&context, "users/alice/private", 0)
+                .allowed
+        );
         assert!(!evaluator.can_publish(&context, "users/messages", 0).allowed);
     }
 

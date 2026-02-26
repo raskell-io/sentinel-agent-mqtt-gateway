@@ -6,11 +6,11 @@
 
 use anyhow::Result;
 use clap::Parser;
-use zentinel_agent_mqtt_gateway::{MqttGatewayAgent, MqttGatewayConfig};
-use zentinel_agent_protocol::v2::{GrpcAgentServerV2, UdsAgentServerV2};
 use std::path::PathBuf;
 use tracing::info;
 use tracing_subscriber::{fmt, EnvFilter};
+use zentinel_agent_mqtt_gateway::{MqttGatewayAgent, MqttGatewayConfig};
+use zentinel_agent_protocol::v2::{GrpcAgentServerV2, UdsAgentServerV2};
 
 /// MQTT Gateway Agent for Zentinel
 #[derive(Parser, Debug)]
@@ -46,8 +46,8 @@ async fn main() -> Result<()> {
     let args = Args::parse();
 
     // Initialize logging
-    let filter = EnvFilter::try_from_default_env()
-        .unwrap_or_else(|_| EnvFilter::new(&args.log_level));
+    let filter =
+        EnvFilter::try_from_default_env().unwrap_or_else(|_| EnvFilter::new(&args.log_level));
 
     if args.json_logs {
         fmt()
@@ -56,10 +56,7 @@ async fn main() -> Result<()> {
             .with_target(true)
             .init();
     } else {
-        fmt()
-            .with_env_filter(filter)
-            .with_target(true)
-            .init();
+        fmt().with_env_filter(filter).with_target(true).init();
     }
 
     // Load configuration
@@ -85,7 +82,8 @@ async fn main() -> Result<()> {
             "Starting MQTT Gateway Agent"
         );
 
-        let addr: std::net::SocketAddr = grpc_addr.parse()
+        let addr: std::net::SocketAddr = grpc_addr
+            .parse()
             .map_err(|e| anyhow::anyhow!("Invalid gRPC address '{}': {}", grpc_addr, e))?;
 
         let server = GrpcAgentServerV2::new("mqtt-gateway", Box::new(agent));
@@ -100,11 +98,7 @@ async fn main() -> Result<()> {
             "Starting MQTT Gateway Agent"
         );
 
-        let server = UdsAgentServerV2::new(
-            "mqtt-gateway",
-            args.socket,
-            Box::new(agent),
-        );
+        let server = UdsAgentServerV2::new("mqtt-gateway", args.socket, Box::new(agent));
 
         server.run().await?;
     }

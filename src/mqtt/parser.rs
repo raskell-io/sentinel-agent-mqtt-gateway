@@ -157,7 +157,11 @@ pub fn parse_packet(data: &[u8]) -> Result<MqttPacket> {
                     .as_ref()
                     .map(|w| qos_to_u8(w.qos))
                     .unwrap_or(0),
-                will_retain: connect.last_will.as_ref().map(|w| w.retain).unwrap_or(false),
+                will_retain: connect
+                    .last_will
+                    .as_ref()
+                    .map(|w| w.retain)
+                    .unwrap_or(false),
             }))
         }
 

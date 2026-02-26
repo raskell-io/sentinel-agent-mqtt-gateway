@@ -70,7 +70,9 @@ impl PatternInspector {
                             severity: Severity::Critical,
                         });
                     }
-                    Err(e) => warn!(pattern = %id, error = %e, "Failed to compile cmd injection pattern"),
+                    Err(e) => {
+                        warn!(pattern = %id, error = %e, "Failed to compile cmd injection pattern")
+                    }
                 }
             }
         }
@@ -102,7 +104,9 @@ impl PatternInspector {
                             severity: Severity::High,
                         });
                     }
-                    Err(e) => warn!(pattern = %id, error = %e, "Failed to compile path traversal pattern"),
+                    Err(e) => {
+                        warn!(pattern = %id, error = %e, "Failed to compile path traversal pattern")
+                    }
                 }
             }
         }
@@ -117,7 +121,9 @@ impl PatternInspector {
                         severity: custom.severity,
                     });
                 }
-                Err(e) => warn!(name = %custom.name, error = %e, "Failed to compile custom pattern"),
+                Err(e) => {
+                    warn!(name = %custom.name, error = %e, "Failed to compile custom pattern")
+                }
             }
         }
 
@@ -147,7 +153,6 @@ impl PatternInspector {
     }
 }
 
-
 // SQL Injection patterns (simplified from WAF agent)
 const SQL_INJECTION_PATTERNS: &[(&str, &str)] = &[
     ("union-select", r"(?i)\bunion\s+(all\s+)?select\b"),
@@ -166,7 +171,10 @@ const SQL_INJECTION_PATTERNS: &[(&str, &str)] = &[
 
 // Command injection patterns
 const COMMAND_INJECTION_PATTERNS: &[(&str, &str)] = &[
-    ("semicolon-cmd", r";\s*(ls|cat|echo|rm|wget|curl|nc|bash|sh|python|perl|ruby)\b"),
+    (
+        "semicolon-cmd",
+        r";\s*(ls|cat|echo|rm|wget|curl|nc|bash|sh|python|perl|ruby)\b",
+    ),
     ("pipe-cmd", r"\|\s*(ls|cat|echo|rm|wget|curl|nc|bash|sh)\b"),
     ("backtick", r"`[^`]+`"),
     ("dollar-paren", r"\$\([^)]+\)"),
@@ -181,7 +189,10 @@ const COMMAND_INJECTION_PATTERNS: &[(&str, &str)] = &[
 const SCRIPT_INJECTION_PATTERNS: &[(&str, &str)] = &[
     ("script-tag", r"(?i)<script[^>]*>"),
     ("script-close", r"(?i)</script\s*>"),
-    ("on-event", r"(?i)\bon(error|load|click|mouse|focus|blur|change|submit)\s*="),
+    (
+        "on-event",
+        r"(?i)\bon(error|load|click|mouse|focus|blur|change|submit)\s*=",
+    ),
     ("javascript-uri", r"(?i)javascript\s*:"),
     ("vbscript-uri", r"(?i)vbscript\s*:"),
     ("data-uri", r"(?i)data\s*:[^,]*;base64"),
@@ -211,7 +222,8 @@ mod tests {
         };
         let inspector = PatternInspector::new(&config).unwrap();
 
-        let detections = inspector.inspect("SELECT * FROM users WHERE id=1 UNION SELECT * FROM passwords");
+        let detections =
+            inspector.inspect("SELECT * FROM users WHERE id=1 UNION SELECT * FROM passwords");
         assert!(!detections.is_empty());
         assert!(detections.iter().any(|d| d.pattern_id.starts_with("sqli-")));
 
@@ -270,13 +282,11 @@ mod tests {
     #[test]
     fn test_custom_patterns() {
         let config = PatternConfig {
-            custom_patterns: vec![
-                crate::config::CustomPattern {
-                    name: "secret".to_string(),
-                    pattern: r"(?i)password\s*=".to_string(),
-                    severity: Severity::High,
-                },
-            ],
+            custom_patterns: vec![crate::config::CustomPattern {
+                name: "secret".to_string(),
+                pattern: r"(?i)password\s*=".to_string(),
+                severity: Severity::High,
+            }],
             ..Default::default()
         };
         let inspector = PatternInspector::new(&config).unwrap();
